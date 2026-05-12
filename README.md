@@ -58,7 +58,7 @@ Resolve only detects the python.org build, **not** Homebrew Python.
 
 ### 3. Install mark_cuts
 
-Download **Mark_Cuts_Installer-v1.0.2.pkg** from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases), then double-click it. The wizard walks you through. Signed + notarized — no Gatekeeper warning.
+Download **Mark_Cuts_Installer-v1.0.3.pkg** from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases), then double-click it. The wizard walks you through. Signed + notarized — no Gatekeeper warning.
 
 The installer:
 
@@ -95,7 +95,7 @@ Three paths. Pick whichever fits.
 
 ### A — Signed .pkg installer (recommended)
 
-Download `Mark_Cuts_Installer-v1.0.2.pkg` from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases) and double-click. Done.
+Download `Mark_Cuts_Installer-v1.0.3.pkg` from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases) and double-click. Done.
 
 ### B — Shell installer
 

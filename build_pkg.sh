@@ -12,7 +12,7 @@
 #       --password "app-specific-password"
 set -e
 
-VERSION="1.0.2"
+VERSION="1.0.3"
 APP_NAME="Mark_Cuts_Installer"
 BUNDLE_ID="com.chadlittlepage.mark-cuts"
 SIGN_ID="Developer ID Installer: Chad Littlepage (72J767FV46)"
