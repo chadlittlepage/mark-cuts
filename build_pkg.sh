@@ -16,7 +16,7 @@ VERSION="1.0.0"
 APP_NAME="Mark_Cuts_Installer"
 BUNDLE_ID="com.chadlittlepage.mark-cuts"
 SIGN_ID="Developer ID Installer: Chad Littlepage (72J767FV46)"
-NOTARY_PROFILE="mark-cuts-notary"
+NOTARY_PROFILE="chads-davinci-notary"
 
 INSTALL_LOCATION="/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit"
 

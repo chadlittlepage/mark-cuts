@@ -100,7 +100,7 @@ The build script lives at `build_pkg.sh` and uses standard macOS tools (`pkgbuil
 ### One-time setup for notarization
 
 ```bash
-xcrun notarytool store-credentials "mark-cuts-notary" \
+xcrun notarytool store-credentials "chads-davinci-notary" \
     --apple-id "your-apple-id@example.com" \
     --team-id "72J767FV46" \
     --password "app-specific-password"
