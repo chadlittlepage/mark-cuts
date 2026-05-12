@@ -12,13 +12,16 @@
 #       --password "app-specific-password"
 set -e
 
-VERSION="1.0.0"
+VERSION="1.0.1"
 APP_NAME="Mark_Cuts_Installer"
 BUNDLE_ID="com.chadlittlepage.mark-cuts"
 SIGN_ID="Developer ID Installer: Chad Littlepage (72J767FV46)"
 NOTARY_PROFILE="chads-davinci-notary"
 
-INSTALL_LOCATION="/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit"
+# Install to all 5 Resolve page Scripts folders so mark_cuts appears in
+# Workspace > Scripts regardless of which page the user is on.
+SCRIPTS_BASE="/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts"
+PAGES="Utility Edit Color Comp Deliver"
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$PROJECT_DIR/build"
@@ -48,12 +51,14 @@ echo "========================================"
 echo ""
 echo "[1/4] Staging installer payload..."
 rm -rf "$STAGING" "$PKG_DIR"
-mkdir -p "$STAGING$INSTALL_LOCATION"
 mkdir -p "$PKG_DIR"
 
-cp "$PROJECT_DIR/mark_cuts.py" "$STAGING$INSTALL_LOCATION/mark_cuts.py"
-chmod 644 "$STAGING$INSTALL_LOCATION/mark_cuts.py"
-echo "  Staged: mark_cuts.py -> $INSTALL_LOCATION"
+for PAGE in $PAGES; do
+    mkdir -p "$STAGING$SCRIPTS_BASE/$PAGE"
+    cp "$PROJECT_DIR/mark_cuts.py" "$STAGING$SCRIPTS_BASE/$PAGE/mark_cuts.py"
+    chmod 644 "$STAGING$SCRIPTS_BASE/$PAGE/mark_cuts.py"
+    echo "  Staged: mark_cuts.py -> $SCRIPTS_BASE/$PAGE/"
+done
 
 # --- Step 2: build component pkg ---
 echo ""

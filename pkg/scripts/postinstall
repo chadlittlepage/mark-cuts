@@ -1,13 +1,110 @@
 #!/bin/bash
-# postinstall - run as root after files are copied.
-# Make sure mark_cuts.py is world-readable so any user account can run it from
-# Resolve's Scripts menu.
-set -e
+# mark_cuts postinstall - runs as root after the pkg payload is copied.
+#
+# Responsibilities:
+#   1. Mirror the script into every real user's ~/Library Scripts folders.
+#      (The payload already covers the system-wide /Library locations.)
+#   2. Check for Python 3 from python.org and log a warning if missing.
+#   3. Drop a Mark_Cuts_NEXT_STEPS.txt on the installing user's Desktop
+#      with the two manual Resolve steps that can't be automated.
 
-TARGET="/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit/mark_cuts.py"
+set +e
 
-if [ -f "$TARGET" ]; then
-    chmod 644 "$TARGET"
+SCRIPTS_SUBPATH="Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts"
+PAGES="Utility Edit Color Comp Deliver"
+SYSTEM_SOURCE="/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit/mark_cuts.py"
+
+if [ ! -f "$SYSTEM_SOURCE" ]; then
+    echo "mark_cuts: ERROR - payload not found at $SYSTEM_SOURCE" >&2
+    exit 1
+fi
+
+# --- 1. Per-user mirror ---
+# Walk /Users/*. For each real user, mkdir each page folder and copy the
+# script. If TCC blocks root (macOS 15+), re-attempt as the target user via su.
+for USER_HOME in /Users/*; do
+    [ -d "$USER_HOME/Library" ] || continue
+    UNAME=$(basename "$USER_HOME")
+    [ "$UNAME" = "Shared" ] && continue
+
+    for PAGE in $PAGES; do
+        USER_DEST="$USER_HOME/$SCRIPTS_SUBPATH/$PAGE"
+        if mkdir -p "$USER_DEST" 2>/dev/null && cp "$SYSTEM_SOURCE" "$USER_DEST/mark_cuts.py" 2>/dev/null; then
+            chmod 644 "$USER_DEST/mark_cuts.py" 2>/dev/null
+        else
+            su "$UNAME" -c "mkdir -p \"$USER_DEST\" && cp \"$SYSTEM_SOURCE\" \"$USER_DEST/mark_cuts.py\"" 2>/dev/null
+        fi
+    done
+
+    # Restore ownership of any directories we created as root
+    chown -R "$UNAME" "$USER_HOME/Library/Application Support/Blackmagic Design" 2>/dev/null
+done
+
+# --- 2. Python 3 from python.org check ---
+# python.org installs to /Library/Frameworks/Python.framework. Homebrew does
+# not. Resolve only sees the python.org install, so warn loudly if absent.
+if [ ! -d "/Library/Frameworks/Python.framework" ]; then
+    echo "mark_cuts: WARNING - Python 3 from python.org not detected." >&2
+    echo "mark_cuts: Install from https://www.python.org/downloads/ before running the script." >&2
+    PYTHON_WARNING=" *** Python 3 from python.org was NOT detected on this Mac.
+     Install it from https://www.python.org/downloads/ before running.
+     (Homebrew Python will not work - Resolve cannot see it.)
+"
+else
+    PYTHON_WARNING=""
+fi
+
+# --- 3. Next-steps doc on the installing user's Desktop ---
+# Installer.app sets $USER and $HOME to the user who ran the install.
+# Fall back to the console user if those are unset.
+INSTALL_USER="${USER:-$(stat -f '%Su' /dev/console 2>/dev/null)}"
+if [ -z "$INSTALL_USER" ] || [ "$INSTALL_USER" = "root" ]; then
+    INSTALL_USER=$(stat -f '%Su' /dev/console 2>/dev/null)
+fi
+INSTALL_HOME=$(eval echo "~$INSTALL_USER" 2>/dev/null)
+
+if [ -n "$INSTALL_HOME" ] && [ -d "$INSTALL_HOME/Desktop" ]; then
+    DESK="$INSTALL_HOME/Desktop/Mark_Cuts_NEXT_STEPS.txt"
+
+    cat > "$DESK" 2>/dev/null << NEXTSTEPS
+mark_cuts - Next Steps
+======================
+$PYTHON_WARNING
+mark_cuts has been installed system-wide and for every user on this Mac.
+It will appear under Workspace > Scripts on every Resolve page (Edit,
+Color, Fusion, Deliver).
+
+TWO MANUAL STEPS REMAIN inside DaVinci Resolve:
+
+  1. Enable external scripting
+     - Open DaVinci Resolve
+     - Preferences > System > General
+     - Set "External scripting using" to "Local"
+     - Save
+     - Quit and re-open Resolve
+
+  2. Run the script
+     - Open a project with a timeline
+     - Workspace > Scripts > mark_cuts
+
+REQUIREMENT: Python 3 must be installed from python.org (not Homebrew).
+   https://www.python.org/downloads/
+
+TROUBLESHOOTING
+  - Not in the Scripts menu?  Restart Resolve.
+  - "Could not connect to DaVinci Resolve."?  External scripting is not
+    set to Local. See step 1.
+  - Python errors?  Python 3 is not from python.org.
+
+Once everything works you can delete this file.
+
+---
+Created by Chad Littlepage
+chad.littlepage@gmail.com  |  323.974.0444
+NEXTSTEPS
+
+    chown "$INSTALL_USER" "$DESK" 2>/dev/null
+    chmod 644 "$DESK" 2>/dev/null
 fi
 
 exit 0

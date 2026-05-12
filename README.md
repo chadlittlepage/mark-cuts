@@ -68,12 +68,21 @@ sudo mkdir -p "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fu
 sudo cp mark_cuts.py "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit/"
 ```
 
+## What the installer does
+
+The .pkg and `install.sh` both:
+
+- Copy `mark_cuts.py` into every Resolve page Scripts folder (Edit, Color, Comp, Deliver, Utility) so the script appears no matter which page you're on
+- Mirror to every real user account on the Mac (system-wide install)
+- Check whether Python 3 from python.org is installed and warn loudly if not
+- Drop a `Mark_Cuts_NEXT_STEPS.txt` on your Desktop with the manual steps below
+
 ## After install — two manual steps
 
 These can't be automated; they're inside DaVinci Resolve.
 
 1. **Enable external scripting** — open Resolve, go to `Preferences > System > General`, set **External scripting using** to **Local**, click **Save**, then restart Resolve.
-2. **Run the script** — open a project with a timeline, then go to `Workspace > Scripts > Edit > mark_cuts`.
+2. **Run the script** — open a project with a timeline, then go to `Workspace > Scripts > mark_cuts` (it appears on every page).
 
 ## Troubleshooting
 
