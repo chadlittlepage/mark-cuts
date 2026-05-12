@@ -58,13 +58,12 @@ Resolve only detects the python.org build, **not** Homebrew Python.
 
 ### 3. Install mark_cuts
 
-Download **Mark_Cuts_Installer-v1.0.1.pkg** from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases), then double-click it. The wizard walks you through. Signed + notarized — no Gatekeeper warning.
+Download **Mark_Cuts_Installer-v1.0.2.pkg** from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases), then double-click it. The wizard walks you through. Signed + notarized — no Gatekeeper warning.
 
 The installer:
 
-- Drops the script into all 5 Resolve page Scripts folders (Edit/Color/Comp/Deliver/Utility)
-- Mirrors it into every user account on the Mac
-- Checks for Python 3 from python.org and warns in the install log if it's missing
+- Drops `mark_cuts.py` into Resolve's system **Utility** folder (`/Library/.../Fusion/Scripts/Utility/`). One copy — Resolve shows Utility scripts at the top of `Workspace > Scripts` on **every** page (Edit, Color, Fusion, Deliver), so this single install reaches every page with no duplicates.
+- Checks for Python 3 from python.org and logs a warning to `/var/log/install.log` if it's missing
 - Drops `Mark_Cuts_NEXT_STEPS.txt` on your Desktop with the next two steps
 
 ### 4. Enable external scripting in Resolve
@@ -96,7 +95,7 @@ Three paths. Pick whichever fits.
 
 ### A — Signed .pkg installer (recommended)
 
-Download `Mark_Cuts_Installer-v1.0.1.pkg` from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases) and double-click. Done.
+Download `Mark_Cuts_Installer-v1.0.2.pkg` from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases) and double-click. Done.
 
 ### B — Shell installer
 
@@ -106,7 +105,7 @@ cd mark-cuts
 ./install.sh
 ```
 
-Prompts for your sudo password. Mirrors what the .pkg does (all 5 page folders, current user's `~/Library`, Desktop next-steps doc).
+Prompts for your sudo password. Same end result as the .pkg: one copy in `/Library/.../Fusion/Scripts/Utility/` and a Desktop next-steps doc.
 
 ### C — Build the .pkg from source
 
@@ -141,7 +140,7 @@ If something still doesn't work, open an [issue](https://github.com/chadlittlepa
 
 ## Uninstall
 
-The installer copies the script to ten paths (5 page folders × system + current user). The simplest way to remove everything:
+v1.0.2 places one file. Earlier versions placed up to ten. `uninstall.sh` removes all of them:
 
 ```bash
 git clone https://github.com/chadlittlepage/mark-cuts.git
@@ -149,13 +148,14 @@ cd mark-cuts
 ./uninstall.sh
 ```
 
-Or, if you don't want to clone, run these directly:
+Or directly:
 
 ```bash
-# System-wide copies
-sudo rm -f "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/"{Utility,Edit,Color,Comp,Deliver}"/mark_cuts.py"
+# v1.0.2 install location
+sudo rm -f "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Utility/mark_cuts.py"
 
-# Current user's copies
+# Legacy locations from v1.0.0 / v1.0.1 (safe to run even if not present)
+sudo rm -f "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/"{Edit,Color,Comp,Deliver}"/mark_cuts.py"
 rm -f "$HOME/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/"{Utility,Edit,Color,Comp,Deliver}"/mark_cuts.py"
 
 # Installer receipt

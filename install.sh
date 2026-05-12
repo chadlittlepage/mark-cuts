@@ -1,41 +1,29 @@
 #!/bin/bash
 # Terminal installer for mark_cuts.
 #
-# Installs the script into every DaVinci Resolve page Scripts folder
-# (Edit/Color/Comp/Deliver/Utility), both system-wide and for the current
-# user, then drops a Next Steps doc on the Desktop.
+# Installs to /Library/.../Fusion/Scripts/Utility/ only. Resolve shows
+# Utility scripts at the top level on every page (Edit, Color, Fusion,
+# Deliver) so a single install reaches every page with no duplicates.
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 SOURCE="$SCRIPT_DIR/mark_cuts.py"
-SCRIPTS_SUBPATH="Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts"
-PAGES="Utility Edit Color Comp Deliver"
+DEST_DIR="/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Utility"
 
 if [ ! -f "$SOURCE" ]; then
     echo "ERROR: mark_cuts.py not found next to install.sh"
     exit 1
 fi
 
-echo "Installing mark_cuts to all Resolve page Scripts folders:"
-echo "  /Library/.../Scripts/{Utility,Edit,Color,Comp,Deliver}/"
-echo "  ~/$SCRIPTS_SUBPATH/{Utility,Edit,Color,Comp,Deliver}/"
+echo "Installing mark_cuts to:"
+echo "  $DEST_DIR/"
 echo ""
 echo "You will be prompted for your password (needed to write into /Library)."
 echo ""
 
-# System-wide
-for PAGE in $PAGES; do
-    sudo mkdir -p "/$SCRIPTS_SUBPATH/$PAGE"
-    sudo cp "$SOURCE" "/$SCRIPTS_SUBPATH/$PAGE/mark_cuts.py"
-    sudo chmod 644 "/$SCRIPTS_SUBPATH/$PAGE/mark_cuts.py"
-done
-
-# Per-user (current user)
-for PAGE in $PAGES; do
-    mkdir -p "$HOME/$SCRIPTS_SUBPATH/$PAGE"
-    cp "$SOURCE" "$HOME/$SCRIPTS_SUBPATH/$PAGE/mark_cuts.py"
-    chmod 644 "$HOME/$SCRIPTS_SUBPATH/$PAGE/mark_cuts.py"
-done
+sudo mkdir -p "$DEST_DIR"
+sudo cp "$SOURCE" "$DEST_DIR/mark_cuts.py"
+sudo chmod 644 "$DEST_DIR/mark_cuts.py"
 
 # Python 3 from python.org check
 if [ ! -d "/Library/Frameworks/Python.framework" ]; then
@@ -56,8 +44,8 @@ if [ -d "$HOME/Desktop" ]; then
 mark_cuts - Next Steps
 ======================
 $PYTHON_WARNING
-mark_cuts has been installed. It will appear under Workspace > Scripts
-on every Resolve page (Edit, Color, Fusion, Deliver).
+mark_cuts has been installed. It will appear at the top of
+Workspace > Scripts on every Resolve page (Edit, Color, Fusion, Deliver).
 
 TWO MANUAL STEPS REMAIN inside DaVinci Resolve:
 
