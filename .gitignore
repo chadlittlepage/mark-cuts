@@ -6,3 +6,9 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+# Build artifacts
+build/
+dist/
+pkg/resources/LICENSE.txt
+

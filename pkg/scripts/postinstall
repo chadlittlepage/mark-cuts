@@ -1,0 +1,13 @@
+#!/bin/bash
+# postinstall - run as root after files are copied.
+# Make sure mark_cuts.py is world-readable so any user account can run it from
+# Resolve's Scripts menu.
+set -e
+
+TARGET="/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit/mark_cuts.py"
+
+if [ -f "$TARGET" ]; then
+    chmod 644 "$TARGET"
+fi
+
+exit 0
