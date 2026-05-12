@@ -29,84 +29,147 @@ Done - added 134 markers across 3 video track(s).
 
 ## Requirements
 
-- **DaVinci Resolve 17 or newer** (Studio or Free)
-- **Python 3 from [python.org](https://www.python.org/downloads/)** — Homebrew Python is not detected by Resolve
-- **macOS 12 (Monterey) or newer** for the .pkg installer
+- **DaVinci Resolve 17 or newer** — Studio *or* Free. Scripting is supported in both as of Resolve 18.
+- **macOS 12 (Monterey) or newer**
+- **Python 3 from [python.org](https://www.python.org/downloads/)** — Homebrew Python is not detected by Resolve, even if `python3 --version` works in your terminal.
 
-## Install
+---
 
-You have three options. Pick whichever fits.
+## Complete first-time install (step by step)
 
-### Option 1 — Signed .pkg installer (recommended)
+Follow this top to bottom. Takes about 5 minutes on a fresh Mac.
 
-Download `Mark_Cuts_Installer.pkg` from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases) and double-click it. The wizard walks you through installation.
+### 1. Install DaVinci Resolve
 
-Builds locally from source:
+Free download from [Blackmagic Design](https://www.blackmagicdesign.com/products/davinciresolve). Either Resolve or Resolve Studio works.
+
+### 2. Install Python 3 from python.org
+
+Resolve only detects the python.org build, **not** Homebrew Python.
+
+1. Go to [python.org/downloads](https://www.python.org/downloads/)
+2. Click the big yellow **Download Python 3.x.x** button
+3. Open the downloaded `.pkg` and click through the installer (default settings are fine)
+4. Verify in Terminal:
+   ```bash
+   ls /Library/Frameworks/Python.framework
+   ```
+   If that prints `Versions` or similar (not "No such file…"), you're set.
+
+### 3. Install mark_cuts
+
+Download **Mark_Cuts_Installer-v1.0.1.pkg** from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases), then double-click it. The wizard walks you through. Signed + notarized — no Gatekeeper warning.
+
+The installer:
+
+- Drops the script into all 5 Resolve page Scripts folders (Edit/Color/Comp/Deliver/Utility)
+- Mirrors it into every user account on the Mac
+- Checks for Python 3 from python.org and warns in the install log if it's missing
+- Drops `Mark_Cuts_NEXT_STEPS.txt` on your Desktop with the next two steps
+
+### 4. Enable external scripting in Resolve
+
+1. Open DaVinci Resolve
+2. In the menu bar: **DaVinci Resolve > Preferences…**
+3. Click the **System** tab, then **General** in the sidebar
+4. Find **External scripting using** and set it to **Local**
+5. Click **Save**
+6. Quit Resolve completely (`Cmd-Q`) and re-open it
+
+### 5. Run mark_cuts
+
+1. Open a project that has a timeline
+2. Open the timeline (click into it)
+3. In the menu bar: **Workspace > Scripts > mark_cuts**
+4. You should see blue **Cut** markers appear at every cut, and a confirmation in the console:
+   ```
+   Done - added 134 markers across 3 video track(s).
+   ```
+
+That's it. You can re-run the script any time — it skips frames that already have a marker.
+
+---
+
+## Quick install (already have Python 3 + Resolve scripting set up)
+
+Three paths. Pick whichever fits.
+
+### A — Signed .pkg installer (recommended)
+
+Download `Mark_Cuts_Installer-v1.0.1.pkg` from the [latest release](https://github.com/chadlittlepage/mark-cuts/releases) and double-click. Done.
+
+### B — Shell installer
 
 ```bash
-./build_pkg.sh --sign       # signed with Developer ID
-./build_pkg.sh --notarize   # signed + notarized + stapled
-./build_pkg.sh              # unsigned (testing only)
-```
-
-The signed pkg lands in `build/Mark_Cuts_Installer-v<version>.pkg`.
-
-### Option 2 — Shell installer
-
-From a clone of the repo:
-
-```bash
+git clone https://github.com/chadlittlepage/mark-cuts.git
+cd mark-cuts
 ./install.sh
 ```
 
-You'll be prompted for your password (the script copies into `/Library/Application Support/...`). Prints next-step instructions when done.
+Prompts for your sudo password. Mirrors what the .pkg does (all 5 page folders, current user's `~/Library`, Desktop next-steps doc).
 
-### Option 3 — Manual
+### C — Build the .pkg from source
 
 ```bash
-sudo mkdir -p "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit/"
-sudo cp mark_cuts.py "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit/"
+git clone https://github.com/chadlittlepage/mark-cuts.git
+cd mark-cuts
+./build_pkg.sh --notarize   # signed + notarized + stapled
+# or
+./build_pkg.sh --sign       # signed only
+# or
+./build_pkg.sh              # unsigned (testing only)
 ```
 
-## What the installer does
+Output lands in `build/Mark_Cuts_Installer-v<version>.pkg`.
 
-The .pkg and `install.sh` both:
-
-- Copy `mark_cuts.py` into every Resolve page Scripts folder (Edit, Color, Comp, Deliver, Utility) so the script appears no matter which page you're on
-- Mirror to every real user account on the Mac (system-wide install)
-- Check whether Python 3 from python.org is installed and warn loudly if not
-- Drop a `Mark_Cuts_NEXT_STEPS.txt` on your Desktop with the manual steps below
-
-## After install — two manual steps
-
-These can't be automated; they're inside DaVinci Resolve.
-
-1. **Enable external scripting** — open Resolve, go to `Preferences > System > General`, set **External scripting using** to **Local**, click **Save**, then restart Resolve.
-2. **Run the script** — open a project with a timeline, then go to `Workspace > Scripts > mark_cuts` (it appears on every page).
+---
 
 ## Troubleshooting
 
 | Symptom | Fix |
 |---|---|
-| Script doesn't appear in `Workspace > Scripts` | Restart Resolve after install. |
-| `Could not connect to DaVinci Resolve.` | External scripting is not set to **Local**. See step 1 above. |
-| Python errors in the console | Python 3 must be installed from python.org. Homebrew Python is not picked up by Resolve. |
-| `Permission denied` during install | Use the .pkg or `install.sh` — both handle `sudo` for you. |
-| Markers added in the wrong place | Confirm the timeline has the playhead at the right project. The script always operates on `GetCurrentTimeline()`. |
+| Script doesn't appear in `Workspace > Scripts` | Quit and re-open Resolve. The scripts menu only refreshes on launch. |
+| `Could not connect to DaVinci Resolve.` in the console | External scripting is not set to **Local**. Re-do step 4 above. |
+| Python error like `ModuleNotFoundError` in the console | Python 3 is missing or is the wrong build. Re-do step 2 above and re-launch Resolve. |
+| `Permission denied` when installing manually | Use the .pkg or `install.sh` — both handle `sudo` for you. |
+| Markers go to the wrong timeline | The script always operates on `GetCurrentTimeline()`. Click into the timeline you want before running. |
+| `Mark_Cuts_NEXT_STEPS.txt` keeps coming back on Desktop | It's only written on install. Delete it once you've completed steps 4-5. |
+
+If something still doesn't work, open an [issue](https://github.com/chadlittlepage/mark-cuts/issues) with: macOS version, Resolve version, Python version (`/Library/Frameworks/Python.framework/Versions/Current/bin/python3 --version`), and what's in the Resolve console after you try to run the script.
+
+---
 
 ## Uninstall
 
+The installer copies the script to ten paths (5 page folders × system + current user). The simplest way to remove everything:
+
 ```bash
-sudo rm "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Edit/mark_cuts.py"
+git clone https://github.com/chadlittlepage/mark-cuts.git
+cd mark-cuts
+./uninstall.sh
 ```
 
-To strip the markers it added, in Resolve: right-click any blue **Cut** marker on the timeline ruler and choose **Delete All Markers** (or filter by color in the marker list).
+Or, if you don't want to clone, run these directly:
 
-## Building the .pkg from source
+```bash
+# System-wide copies
+sudo rm -f "/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/"{Utility,Edit,Color,Comp,Deliver}"/mark_cuts.py"
 
-The build script lives at `build_pkg.sh` and uses standard macOS tools (`pkgbuild`, `productbuild`, `productsign`, `xcrun notarytool`, `xcrun stapler`). No extra dependencies.
+# Current user's copies
+rm -f "$HOME/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/"{Utility,Edit,Color,Comp,Deliver}"/mark_cuts.py"
 
-### One-time setup for notarization
+# Installer receipt
+sudo pkgutil --forget com.chadlittlepage.mark-cuts 2>/dev/null
+
+# Next-steps note on your Desktop
+rm -f "$HOME/Desktop/Mark_Cuts_NEXT_STEPS.txt"
+```
+
+To strip the markers it added inside Resolve: filter the marker list by color **Blue** with name **Cut**, select all, and delete.
+
+---
+
+## Notarization setup (only needed if you're building from source)
 
 ```bash
 xcrun notarytool store-credentials "chads-davinci-notary" \
@@ -115,26 +178,19 @@ xcrun notarytool store-credentials "chads-davinci-notary" \
     --password "app-specific-password"
 ```
 
-App-specific passwords are generated at [appleid.apple.com](https://appleid.apple.com) under **Sign-In and Security > App-Specific Passwords**.
-
-Then:
-
-```bash
-./build_pkg.sh --notarize
-```
-
-Notarization takes 30-120 seconds. The stapled pkg is ready for distribution with no Gatekeeper warning.
+App-specific passwords are generated at [appleid.apple.com](https://appleid.apple.com) → **Sign-In and Security > App-Specific Passwords**. Then `./build_pkg.sh --notarize`.
 
 ## Project layout
 
 ```
 mark_cuts/
-├── mark_cuts.py            # the actual Resolve script
-├── install.sh              # Terminal installer
-├── build_pkg.sh            # builds Mark_Cuts_Installer.pkg
+├── mark_cuts.py            # the Resolve script
+├── install.sh              # Terminal installer (mirrors the .pkg)
+├── uninstall.sh            # Removes all installed copies
+├── build_pkg.sh            # Builds Mark_Cuts_Installer.pkg
 ├── pkg/
-│   ├── scripts/postinstall # runs as root during install
-│   └── resources/          # welcome/conclusion HTML for the installer wizard
+│   ├── scripts/postinstall # Runs as root during install
+│   └── resources/          # Welcome / conclusion HTML for the installer wizard
 ├── README.md
 └── LICENSE
 ```
